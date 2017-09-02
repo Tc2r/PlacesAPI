@@ -46,7 +46,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	public static final int PROXIMITY_RADIUS = 2147;
 
 	// Base Google API URLS
-	private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+	private static final String BASE_NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+	private static final String BASE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json?";
 
 
 	private GoogleMap mMap;
@@ -56,7 +57,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 	private LocationRequest locationRequest;
-	//private Location lastKnownLocation;
 	private double latitude, longitude;
 
 
@@ -96,7 +96,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 					}
 				} else {
 					// permission is denied
-					Toast.makeText(this, "PERMISSION DENIED", Toast.LENGTH_LONG).show();
+					Toast.makeText(this, R.string.permission_denied_toast, Toast.LENGTH_LONG).show();
 				}
 		}
 	}
@@ -150,7 +150,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		// Marker Options set properties to the marker.
 		MarkerOptions markerOptions = new MarkerOptions();
 		markerOptions.position(latLng);
-		markerOptions.title("Current Location");
+		markerOptions.title(getString(R.string.marker_my_location_title));
 		markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
 		// set marker to location of markerOptions on map.
@@ -174,7 +174,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 		Object dataTransfer[] = new Object[2];
-		String url;
+		String url, searchType;
 		GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
 
 		switch (view.getId()) {
@@ -198,13 +198,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 								Address myAddress = addressList.get(i);
 
+
 								// get lat and long from the Listener
 								LatLng latLng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
 
 								// Marker Options set properties to the marker.
 								MarkerOptions mo = new MarkerOptions();
 								mo.position(latLng);
-								mo.title("location");
+								mo.title(myAddress.getThoroughfare());
 								mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 
 								// Set camera and map options.
@@ -224,34 +225,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 				// Clear map of markers
 				mMap.clear();
-				String hospital = "hospital";
-				url = getUrl(latitude, longitude, hospital);
+				searchType = getString(R.string.search_type_hospital);
+				url = getUrl(latitude, longitude, searchType);
 				dataTransfer[0] = mMap;
 				dataTransfer[1] = url;
 				getNearbyPlacesData.execute(dataTransfer);
-				Toast.makeText(this, "SHOWING NEARBY HOSPITALS", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.search_text_toast_1, Toast.LENGTH_LONG).show();
 				break;
 
 
 			case R.id.btn_restaurants:
 				mMap.clear();
-				String restaurant = "restaurant";
-				url = getUrl(latitude, longitude, restaurant);
+				searchType = getString(R.string.search_type_restaurant);
+				url = getUrl(latitude, longitude, searchType);
 				dataTransfer[0] = mMap;
 				dataTransfer[1] = url;
 				getNearbyPlacesData.execute(dataTransfer);
-				Toast.makeText(this, "SHOWING NEARBY RESTAURANTS", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.search_text_toast_2, Toast.LENGTH_LONG).show();
 				break;
 
 
 			case R.id.btn_schools:
 				mMap.clear();
-				String school = "school";
-				url = getUrl(latitude, longitude, school);
+				searchType = getString(R.string.search_type_school);
+				url = getUrl(latitude, longitude, searchType);
 				dataTransfer[0] = mMap;
 				dataTransfer[1] = url;
 				getNearbyPlacesData.execute(dataTransfer);
-				Toast.makeText(this, "SHOWING NEARBY SCHOOLS", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.search_text_toast_3, Toast.LENGTH_LONG).show();
 				break;
 
 
@@ -265,7 +266,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 		// Create the proper url to get a Json String from the GooglePlacesUrl.
 
-		StringBuilder googlePlaceUrl = new StringBuilder(BASE_URL);
+		StringBuilder googlePlaceUrl = new StringBuilder(BASE_NEARBY_URL);
 		googlePlaceUrl.append("location=" + latitude + "," + longitude);
 		googlePlaceUrl.append("&radius=" + PROXIMITY_RADIUS);
 		googlePlaceUrl.append("&type=" + nearbyPlace);

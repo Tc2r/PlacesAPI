@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">PlacesAPI</string>
     <string name="title_activity_maps">Map</string>
+    <string name="permission_denied_toast">PERMISSION DENIED</string>
+    <string name="marker_my_location_title">Current Location</string>
+    <string name="search_type_hospital">hospital</string>
+    <string name="search_type_restaurant">restaurant</string>
+    <string name="search_type_school">school</string>
+    <string name="search_text_toast_1">SHOWING NEARBY HOSPITALS</string>
+    <string name="search_text_toast_2">SHOWING NEARBY RESTAURANTS</string>
+    <string name="search_text_toast_3">SHOWING NEARBY SCHOOLS</string>
 </resources>

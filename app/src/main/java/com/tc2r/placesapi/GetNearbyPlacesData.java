@@ -30,7 +30,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
 
 	@Override
 	protected String doInBackground(Object... objects) {
-		// Get transfered data objects from array. cast to correct types.
+		// Get transferred data objects from array. cast to correct types.
 		mMap = (GoogleMap) objects[0];
 		url = (String)objects[1];
 
