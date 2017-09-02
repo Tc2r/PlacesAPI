@@ -39,24 +39,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 				, LocationListener
 				, GoogleApiClient.OnConnectionFailedListener {
 
+	// Unique Permission Code for fine GPS locaiton
 	public static final int PERMISSION_REQUEST_LOCATION_CODE = 99;
 
+	// Distance from phone location we can find places.
 	public static final int PROXIMITY_RADIUS = 2147;
+
+	// Base Google API URLS
 	private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
-	double latitude, longitude;
+
 
 	private GoogleMap mMap;
 	private GoogleApiClient client;
-	private LocationRequest locationRequest;
-	private Location lastKnownLocation;
 	private Marker currentLocationMarker;
 	private List<Address> addressList = null;
+
+
+	private LocationRequest locationRequest;
+	//private Location lastKnownLocation;
+	private double latitude, longitude;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_maps);
 
+		// If Build version is greater than 23
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			checkLocationPermission();
 		}
@@ -75,8 +84,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 					// permission is granted
 					if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 						if (client == null) {
+
+							// create api client
 							buildGoogleApiClient();
 						}
+
+						// Enables the My Location Layer on the map.
+						// Creates a button in the top right corner of the map. on click the camera centers
+						// the map on the current location of the device.
 						mMap.setMyLocationEnabled(true);
 					}
 				} else {
@@ -90,8 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	/**
 	 * Manipulates the map once available.
 	 * This callback is triggered when the map is ready to be used.
-	 * This is where we can add markers or lines, add listeners or move the camera. In this case,
-	 * we just add a marker near Sydney, Australia.
+	 * This is where we can add markers or lines, add listeners or move the camera.
 	 * If Google Play services is not installed on the device, the user will be prompted to install
 	 * it inside the SupportMapFragment. This method will only be triggered once the user has
 	 * installed Google Play services and returned to the app.
@@ -100,6 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	public void onMapReady(GoogleMap googleMap) {
 		mMap = googleMap;
 
+		// If we are granted permissions, build Client
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 			buildGoogleApiClient();
 			mMap.setMyLocationEnabled(true);
@@ -107,6 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	}
 
 	protected synchronized void buildGoogleApiClient() {
+		// Builds and connects to client
 		client = new GoogleApiClient.Builder(this)
 						.addConnectionCallbacks(this)
 						.addOnConnectionFailedListener(this)
@@ -118,9 +134,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 	@Override
 	public void onLocationChanged(Location location) {
+
+		// get lat and long from the Listener
 		latitude = location.getLatitude();
 		longitude = location.getLongitude();
-		lastKnownLocation = location;
+		LatLng latLng = new LatLng(latitude, longitude);
 
 		// if there is a marker already, remove it.
 		if (currentLocationMarker != null) {
@@ -129,15 +147,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		}
 		Log.d("lat = ", "" + latitude);
 
-		LatLng latLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
 		// Marker Options set properties to the marker.
 		MarkerOptions markerOptions = new MarkerOptions();
 		markerOptions.position(latLng);
 		markerOptions.title("Current Location");
-		markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+		markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+
+		// set marker to location of markerOptions on map.
 		currentLocationMarker = mMap.addMarker(markerOptions);
+
+
+		// Set camera and map options.
 		mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-		mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
+		mMap.animateCamera(CameraUpdateFactory.zoomBy(15));
+		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
 		// Stop location updates
 		if (client != null) {
@@ -145,35 +168,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		}
 	}
 
+
+	// When an Object is clicked this method will run.
 	public void onClick(View view) {
+
 
 		Object dataTransfer[] = new Object[2];
 		String url;
 		GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
 
 		switch (view.getId()) {
-			case R.id.B_search:
-				EditText locationET = findViewById(R.id.TF_location);
+			case R.id.btn_search:
+				// Take the input from the editText  and check for
+				// addresses near the phone location that match input.
+				EditText locationET = findViewById(R.id.et_location);
 				String location = locationET.getText().toString();
-				if (!location.equals("")) {
-					Geocoder geocoder = new Geocoder(this);
 
+				if (!location.equals("")) {
+
+					Geocoder geocoder = new Geocoder(this);
 					try {
+
+						//Returns an array of Addresses that are known to describe the named location,
 						addressList = geocoder.getFromLocationName(location, 5);
 
 						if (addressList != null) {
-
+							// set up map markers for each returned Address.
 							for (int i = 0; i < addressList.size(); i++) {
 
 								Address myAddress = addressList.get(i);
+
+								// get lat and long from the Listener
 								LatLng latLng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
+
+								// Marker Options set properties to the marker.
 								MarkerOptions mo = new MarkerOptions();
 								mo.position(latLng);
 								mo.title("location");
+								mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 
+								// Set camera and map options.
 								mMap.addMarker(mo);
 								mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-								mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+								mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
 							}
 						}
 
@@ -182,7 +219,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 					}
 				}
 				break;
+
 			case R.id.btn_hospitals:
+
+				// Clear map of markers
 				mMap.clear();
 				String hospital = "hospital";
 				url = getUrl(latitude, longitude, hospital);
@@ -193,7 +233,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 				break;
 
 
-			case R.id.B_restaurants:
+			case R.id.btn_restaurants:
 				mMap.clear();
 				String restaurant = "restaurant";
 				url = getUrl(latitude, longitude, restaurant);
@@ -204,23 +244,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 				break;
 
 
-			case R.id.B_schools:
+			case R.id.btn_schools:
 				mMap.clear();
 				String school = "school";
 				url = getUrl(latitude, longitude, school);
 				dataTransfer[0] = mMap;
 				dataTransfer[1] = url;
 				getNearbyPlacesData.execute(dataTransfer);
-
 				Toast.makeText(this, "SHOWING NEARBY SCHOOLS", Toast.LENGTH_LONG).show();
 				break;
 
-			case R.id.B_to:
+
+			case R.id.btn_to:
 				break;
 		}
 	}
 
 	private String getUrl(double latitude, double longitude, String nearbyPlace) {
+
+
+		// Create the proper url to get a Json String from the GooglePlacesUrl.
 
 		StringBuilder googlePlaceUrl = new StringBuilder(BASE_URL);
 		googlePlaceUrl.append("location=" + latitude + "," + longitude);
@@ -229,7 +272,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		googlePlaceUrl.append("&sensor=true");
 		//googlePlaceUrl.append("&keyword=tacos");
 		googlePlaceUrl.append("&key=" + getResources().getString(R.string.google_places_key));
-
 		Log.wtf("URL IS", googlePlaceUrl.toString());
 		return googlePlaceUrl.toString();
 	}
@@ -241,9 +283,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		// create a location request
 		locationRequest = new LocationRequest();
 
-		// set the interval of time its called in milliseconds
-		locationRequest.setInterval(100);
-		locationRequest.setFastestInterval(1000);
+		// set the interval in which you want to get locations (milliseconds).
+		locationRequest.setInterval(60 * 1000);
+		// set highest rate of intervals to receive updates.
+		locationRequest.setFastestInterval(20 * 1000);
+		// set priority of location request.
 		locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -253,8 +297,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 	public boolean checkLocationPermission() {
 
+		//Determine whether you have been granted a particular permission.
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
+			// Gets whether you should show UI with rationale for requesting a permission.
 			if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
 				// Returns true if app has requested this permission previously and request was denied
 
