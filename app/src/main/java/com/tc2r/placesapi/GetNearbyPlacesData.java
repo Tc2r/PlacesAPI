@@ -30,24 +30,34 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
 
 	@Override
 	protected String doInBackground(Object... objects) {
+		// Get transfered data objects from array. cast to correct types.
 		mMap = (GoogleMap) objects[0];
 		url = (String)objects[1];
 
+		// create an instance of DownloadUrl to get the correct Json Information. .
 		DownloadUrl downloadUrl = new DownloadUrl();
 		googlePlacesData = downloadUrl.readUrl(url);
 
+		// return the proper json information.
 		return googlePlacesData;
 	}
 
 	@Override
 	protected void onPostExecute(String s) {
+
+		// convert Json string into Hashmap list of places.
 		List<HashMap<String, String>> nearbyPlaceList = null;
 		DataParser parser = new DataParser();
 		nearbyPlaceList = parser.parse(s);
+
+		// Display nearby places.
 		showNearbyPlaces(nearbyPlaceList);
 	}
 
 	private void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList) {
+
+		// For every place in the hashmap NearbyPlace List, create a map marker
+		// and place it on the map at the correct location.
 
 		for (int i = 0; i < nearbyPlaceList.size(); i++) {
 			MarkerOptions markerOptions = new MarkerOptions();
