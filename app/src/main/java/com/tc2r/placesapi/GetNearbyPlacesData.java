@@ -73,7 +73,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
 			markerOptions.title(placeName + "; " + vicinity);
 			markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
 
-			mMap.addMarker(markerOptions);
+			mMap.addMarker(markerOptions).showInfoWindow();
 			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 			mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
 
