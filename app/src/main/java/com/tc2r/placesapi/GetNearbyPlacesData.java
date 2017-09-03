@@ -17,7 +17,7 @@ import java.util.List;
  * Description:
  */
 
-public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
+public class GetNearbyPlacesData extends AsyncTask<Object, String, String> {
 
 	String googlePlacesData;
 	GoogleMap mMap;
@@ -30,9 +30,10 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
 
 	@Override
 	protected String doInBackground(Object... objects) {
+
 		// Get transferred data objects from array. cast to correct types.
 		mMap = (GoogleMap) objects[0];
-		url = (String)objects[1];
+		url = (String) objects[1];
 
 		// create an instance of DownloadUrl to get the correct Json Information. .
 		DownloadUrl downloadUrl = new DownloadUrl();
@@ -60,6 +61,7 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
 		// and place it on the map at the correct location.
 
 		for (int i = 0; i < nearbyPlaceList.size(); i++) {
+
 			MarkerOptions markerOptions = new MarkerOptions();
 			HashMap<String, String> googlePlace = nearbyPlaceList.get(i);
 
@@ -73,12 +75,9 @@ public class GetNearbyPlacesData extends AsyncTask<Object, String, String>{
 			markerOptions.title(placeName + "; " + vicinity);
 			markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
 
-			mMap.addMarker(markerOptions);
+			mMap.addMarker(markerOptions).showInfoWindow();
 			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 			mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
-
 		}
 	}
-
-
 }
