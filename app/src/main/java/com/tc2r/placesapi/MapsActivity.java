@@ -82,7 +82,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 				// check if permission was granted or not
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					// permission is granted
-					if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+					if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
 						if (client == null) {
 
 							// create api client
