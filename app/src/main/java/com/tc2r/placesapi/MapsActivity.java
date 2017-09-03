@@ -37,7 +37,9 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 				, GoogleApiClient.ConnectionCallbacks
 				, LocationListener
-				, GoogleApiClient.OnConnectionFailedListener {
+				, GoogleApiClient.OnConnectionFailedListener
+				, GoogleMap.OnMarkerClickListener
+				, GoogleMap.OnMarkerDragListener {
 
 	// Unique Permission Code for fine GPS locaiton
 	public static final int PERMISSION_REQUEST_LOCATION_CODE = 99;
@@ -57,7 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 	private LocationRequest locationRequest;
-	private double latitude, longitude;
+	private double latitude, longitude, endLatitude, endLongitude;
 
 
 	@Override
@@ -82,7 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 				// check if permission was granted or not
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					// permission is granted
-					if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+					if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 						if (client == null) {
 
 							// create api client
@@ -119,6 +121,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 			buildGoogleApiClient();
 			mMap.setMyLocationEnabled(true);
 		}
+
+		// create listeners for marker.
+		mMap.setOnMarkerClickListener(this);
+		mMap.setOnMarkerDragListener(this);
 	}
 
 	protected synchronized void buildGoogleApiClient() {
@@ -151,7 +157,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		MarkerOptions markerOptions = new MarkerOptions();
 		markerOptions.position(latLng);
 		markerOptions.title(getString(R.string.marker_my_location_title));
-		markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+		markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
 		// set marker to location of markerOptions on map.
 		currentLocationMarker = mMap.addMarker(markerOptions);
@@ -257,6 +263,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 			case R.id.btn_to:
+				// when user clicks, first clear map.
+				mMap.clear();
+
+				// create marker using markerOptions
+				MarkerOptions markerOptions = new MarkerOptions();
+				markerOptions.position(new LatLng(endLatitude, endLongitude));
+				markerOptions.title("Destinations");
+				markerOptions.draggable(true);
+				markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
+				// We use Location.distanceBetween to calculate the distance.
+
+				float results[] = new float[10];
+				Location.distanceBetween(latitude, longitude, endLatitude, endLongitude, results);
+
+				markerOptions.snippet("Distance: " + results[0]);
+
+				// add marker to map.
+				mMap.addMarker(markerOptions);
+
+
 				break;
 		}
 	}
@@ -331,4 +358,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 	}
 
 
+	@Override
+	public boolean onMarkerClick(Marker marker) {
+		// when user clicks marker, make it draggable
+		marker.setDraggable(true);
+
+
+		return false;
+	}
+
+	@Override
+	public void onMarkerDragStart(Marker marker) {
+
+	}
+
+	@Override
+	public void onMarkerDrag(Marker marker) {
+
+	}
+
+	@Override
+	public void onMarkerDragEnd(Marker marker) {
+		// After user drags marker, get the new coordinates.
+
+		endLatitude = marker.getPosition().latitude;
+		endLongitude = marker.getPosition().longitude;
+
+	}
 }
