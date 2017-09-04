@@ -2,6 +2,7 @@ package com.tc2r.placesapi;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -27,6 +28,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -58,6 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 	private LocationRequest locationRequest;
 	private double latitude, longitude;
+	private Circle circle;
 
 
 	@Override
@@ -145,6 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		if (currentLocationMarker != null) {
 
 			currentLocationMarker.remove();
+			currentLocationMarker = null;
 		}
 		Log.d("lat = ", "" + latitude);
 
@@ -161,14 +166,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		// Set camera and map options.
 		mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 		mMap.animateCamera(CameraUpdateFactory.zoomBy(15));
-		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+//		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+		if (circle != null) {
+			circle.remove();
+			circle = null;
+		}
+		circle = drawCircle(latLng);
 		// Stop location updates
 		if (client != null) {
 			LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
 		}
 	}
 
+	private Circle drawCircle(LatLng latLng) {
+
+		CircleOptions circleOptions = new CircleOptions();
+
+		// Center of circle.
+		circleOptions.center(latLng);
+
+		// Radius of circle in meters
+		circleOptions.radius(1000);
+
+		// fills with hex number.
+		circleOptions.fillColor(0x33FF0000);
+
+		// border line color.
+		circleOptions.strokeColor(Color.CYAN);
+		circleOptions.strokeWidth(3);
+
+		return mMap.addCircle(circleOptions);
+	}
 
 	// When an Object is clicked this method will run.
 	public void onClick(View view) {
