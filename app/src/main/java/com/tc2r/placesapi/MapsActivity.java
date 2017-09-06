@@ -226,12 +226,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 				// Clear map of markers
 				mMap.clear();
-				searchType = getString(R.string.search_type_hospital);
+				searchType = "Gas Station";
 				url = getUrl(latitude, longitude, searchType);
 				dataTransfer[0] = mMap;
 				dataTransfer[1] = url;
 				getNearbyPlacesData.execute(dataTransfer);
-				Toast.makeText(this, R.string.search_text_toast_1, Toast.LENGTH_LONG).show();
+				Toast.makeText(this, "Searching for Gas Stations", Toast.LENGTH_LONG).show();
 				break;
 
 
