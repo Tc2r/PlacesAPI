@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -120,6 +121,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 			buildGoogleApiClient();
 			mMap.setMyLocationEnabled(true);
 		}
+
+		// customize map marker info
+		if (!mMap.equals(null)) {
+			mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+				@Override
+				public View getInfoWindow(Marker marker) {
+					View v = getLayoutInflater().inflate(R.layout.info_window, null);
+
+					// assign objects in info_window layout.
+					TextView tvLocality = v.findViewById(R.id.tv_locality);
+					TextView tvLat = v.findViewById(R.id.tv_lat);
+					TextView tvLong = v.findViewById(R.id.tv_long);
+					TextView tvSnippet = v.findViewById(R.id.tv_snippet);
+
+					// get latlong from maker.
+					LatLng latLng = marker.getPosition();
+
+					// set text
+					tvLocality.setText(marker.getTitle());
+					tvLat.setText("Latitude: " + latLng.latitude);
+					tvLong.setText("Longitude: " + latLng.longitude);
+					tvSnippet.setText(marker.getSnippet());
+
+					return v;
+				}
+
+				@Override
+				public View getInfoContents(Marker marker) {
+
+					return null;
+				}
+			});
+		}
 	}
 
 	protected synchronized void buildGoogleApiClient() {
@@ -152,7 +186,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		MarkerOptions markerOptions = new MarkerOptions();
 		markerOptions.position(latLng);
 		markerOptions.title(getString(R.string.marker_my_location_title));
-		markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+
+		// Adding a Custom Map Marker I just made.
+		markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.tcmapmarker));
 
 		// set marker to location of markerOptions on map.
 		currentLocationMarker = mMap.addMarker(markerOptions);
@@ -206,7 +242,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 								// Marker Options set properties to the marker.
 								MarkerOptions mo = new MarkerOptions();
 								mo.position(latLng);
-								mo.title(myAddress.getThoroughfare());
+								mo.title(myAddress.getLocality());
 								mo.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 
 								// Set camera and map options.
